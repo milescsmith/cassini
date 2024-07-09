@@ -21,8 +21,8 @@ from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
     Progress,
-    RenderableColumn,
-    SpinnerColumn,
+    # RenderableColumn,
+    # SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
@@ -226,7 +226,6 @@ def get_printers(printer: Optional[str] = None, broadcast: str = "<broadcast>",)
         printers = SaturnPrinter().find_printers(broadcast=broadcast)
         if len(printers) == 0:
             logger.error("No printers found on network")
-        printer = printers[0]
     return printers
 
 

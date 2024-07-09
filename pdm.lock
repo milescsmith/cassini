@@ -5,33 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.2"
-content_hash = "sha256:dc34081dbe36bd49bc7295bec24466c7f9d51af9bb7fc5e60ab3bfc356da4a1c"
-
-[[package]]
-name = "about-time"
-version = "4.2.1"
-requires_python = ">=3.7, <4"
-summary = "Easily measure timing and throughput of code blocks, with beautiful human friendly representations."
-groups = ["default"]
-files = [
-    {file = "about-time-4.2.1.tar.gz", hash = "sha256:6a538862d33ce67d997429d14998310e1dbfda6cb7d9bbfbf799c4709847fece"},
-    {file = "about_time-4.2.1-py3-none-any.whl", hash = "sha256:8bbf4c75fe13cbd3d72f49a03b02c5c7dca32169b6d49117c257e7eb3eaee341"},
-]
-
-[[package]]
-name = "alive-progress"
-version = "3.1.4"
-requires_python = ">=3.7, <4"
-summary = "A new kind of Progress Bar, with real-time throughput, ETA, and very cool animations!"
-groups = ["default"]
-dependencies = [
-    "about-time==4.2.1",
-    "grapheme==0.6.0",
-]
-files = [
-    {file = "alive-progress-3.1.4.tar.gz", hash = "sha256:74a95d8d0d42bc99d3a3725dbd06ebb852245f1b64e301a7c375b92b22663f7b"},
-    {file = "alive_progress-3.1.4-py3-none-any.whl", hash = "sha256:c80ad87ce9c1054b01135a87fae69ecebbfc2107497ae87cbe6aec7e534903db"},
-]
+content_hash = "sha256:02442941de7eb445e884966ad39e0e7ec029aaa77e9c900f8c19cd5b4137c868"
 
 [[package]]
 name = "click"
@@ -57,15 +31,6 @@ marker = "sys_platform == \"win32\" or platform_system == \"Windows\""
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
-]
-
-[[package]]
-name = "grapheme"
-version = "0.6.0"
-summary = "Unicode grapheme helpers"
-groups = ["default"]
-files = [
-    {file = "grapheme-0.6.0.tar.gz", hash = "sha256:44c2b9f21bbe77cfb05835fec230bd435954275267fea1858013b102f8603cca"},
 ]
 
 [[package]]

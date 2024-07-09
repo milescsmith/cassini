@@ -108,7 +108,7 @@ class SaturnPrinter:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         with sock:
             sock.settimeout(timeout)
-            sock.sendto(b"M99999", (self.addr, SATURN_UDP_PORT))
+            sock.sendto(b"M99999", self.addr)
             try:
                 data, addr = sock.recvfrom(1024)
             except TimeoutError:
@@ -312,6 +312,7 @@ class SaturnPrinter:
         return f"{attrs['Name']} ({attrs['MachineName']})"
 
     def status(self):
+        self.refresh()
         printinfo = self.desc["Data"]["Status"]["PrintInfo"]
         return {
             "status": self.desc["Data"]["Status"]["CurrentStatus"],

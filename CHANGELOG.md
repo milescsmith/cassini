@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0] - 2024-07-08
+
+### Fixed
+
+- Fixed the `SaturnPrinter.refresh()` method
+
+### Changed
+
+- The `SaturnPrinter.status()` method now refresh before printing the statsu
+
 ## [1.0.0] - 2024-07-07
 
 ### Changed
