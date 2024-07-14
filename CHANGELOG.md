@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0] - 2024-07-13
+
+### Added
+
+- added the `--live` option to `cassini.cassini.status` to allow for a persistent table that updates in realtime
+- added a draft of a `Printer` abstract base class to help others with extending cassini beyond Saturn printers
+
+## [1.2.0] - 2024-07-10
+
+### Added
+
+- Added a `Printer` abstract base class so there's a defined interface for extending cassini to printers beyond the Saturn 3
+
 ## [1.1.0] - 2024-07-08
 
 ### Fixed

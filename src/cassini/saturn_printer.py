@@ -17,8 +17,11 @@ from typing import Final
 
 from loguru import logger
 
+from cassini.printer import Printer
+
 SATURN_UDP_PORT: Final[int] = 3000
-TOO_MANY_STATUS_REPLIES: Final[int] =5
+TOO_MANY_STATUS_REPLIES: Final[int] = 5
+
 
 # CurrentStatus field inside Status
 class CurrentStatus(IntEnum):
@@ -31,6 +34,7 @@ class CurrentStatus(IntEnum):
 class PrintInfoStatus(IntEnum):
     # TODO: double check these
     NOTPRINTING = 0
+    STARTINGPRINT = 1
     EXPOSURE = 2
     RETRACTING = 3
     LOWERING = 4
@@ -57,7 +61,8 @@ def random_hexstr():
     return f"{random.getrandbits(128):032x}"
 
 
-class SaturnPrinter:
+# TODO: feels like we should change the desc member to either a namedtuple or dataclass
+class SaturnPrinter(Printer):
     def __init__(self, addr=None, desc=None, timeout=5):
         self.addr = addr
         self.timeout = timeout
@@ -80,9 +85,7 @@ class SaturnPrinter:
             sock.sendto(b"M99999", (broadcast, SATURN_UDP_PORT))
 
             now = time.time()
-            while True:
-                if time.time() - now > timeout:
-                    break
+            while not time.time() - now > timeout:
                 try:
                     data, addr = sock.recvfrom(1024)
                 except TimeoutError:
@@ -155,7 +158,7 @@ class SaturnPrinter:
     async def disconnect(self):
         await self.send_command_and_wait(Command.DISCONNECT)
 
-    async def upload_file(self, filename, start_printing=False):
+    async def upload_file(self, filename: Path, start_printing: bool = False):
         try:
             await self.upload_file_inner(filename, start_printing)
         except Exception as ex:
@@ -163,7 +166,7 @@ class SaturnPrinter:
             self.file_transfer_future.set_result((-1, -1, filename))
             self.file_transfer_future = asyncio.get_running_loop().create_future()
 
-    async def upload_file_inner(self, filename, start_printing=False):
+    async def upload_file_inner(self, filename: Path, start_printing: bool = False):
         # schedule a future that can be used for status, in case this is kicked off as a task
         self.file_transfer_future = asyncio.get_running_loop().create_future()
 
@@ -224,10 +227,7 @@ class SaturnPrinter:
 
                 self.file_transfer_future.set_result((current_offset, total_size, file_name))
                 self.file_transfer_future = asyncio.get_running_loop().create_future()
-            elif reply["topic"] == f"/sdcp/attributes/{self.id}":
-                # ignore these
-                pass
-            else:
+            elif reply["topic"] != f"/sdcp/attributes/{self.id}":
                 logger.warning(f"Got unknown topic message: {reply['topic']}")
 
         self.file_transfer_future = None
@@ -249,10 +249,7 @@ class SaturnPrinter:
                     return result
             elif reply["topic"] == f"/sdcp/status/{self.id}":
                 self.incoming_status(data["Data"]["Status"])
-            elif reply["topic"] == f"/sdcp/attributes/{self.id}":
-                # ignore these
-                pass
-            else:
+            elif reply["topic"] != f"/sdcp/attributes/{self.id}":
                 logger.warning(f"Got unknown topic message: {reply['topic']}")
 
     async def print_file(self, filename):
@@ -290,10 +287,7 @@ class SaturnPrinter:
                     logger.warning("Too many status replies without success or failure")
                     return False
 
-            elif reply["topic"] == "/sdcp/attributes/" + self.id:
-                # ignore these
-                pass
-            else:
+            elif reply["topic"] != f"/sdcp/attributes/{self.id}":
                 logger.warning(f"Got unknown topic message: {reply['topic']}")
 
     async def process_responses(self):

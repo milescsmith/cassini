@@ -22,6 +22,7 @@ MQTT_DISCONNECT: Final[int] = 14
 MIN_NUMBER_OF_BYTES: Final[int] = 2
 MAX_FINAL_REMAINING_LENGTH: Final[int] = 2097152
 
+
 class SimpleMQTTServer:
     def __init__(self, host: str, port: int):
         self.host = host
@@ -87,19 +88,14 @@ class SimpleMQTTServer:
                 # await self.send_msg(writer, *msg)
                 outgoing_messages_future = asyncio.ensure_future(self.outgoing_messages.get())
 
-            if read_future in completed:
-                d = read_future.result()
-                data += d
-                read_future = asyncio.ensure_future(reader.read(1024))
-            else:
+            if read_future not in completed:
                 continue
 
+            d = read_future.result()
+            data += d
+            read_future = asyncio.ensure_future(reader.read(1024))
             # Process any messages
-            while True:
-                # must have at least 2 bytes
-                if len(data) < MIN_NUMBER_OF_BYTES:
-                    break
-
+            while len(data) >= MIN_NUMBER_OF_BYTES:
                 msg_type = data[0] >> 4
                 msg_flags = data[0] & 0xF
                 # print(f" msg_type: {msg_type} msg_flags: {msg_flags}")
@@ -119,7 +115,7 @@ class SimpleMQTTServer:
                 data = data[head_len + msg_length :]
 
                 if msg_type == MQTT_CONNECT:
-                    if message[0:6] != b"\x00\x04MQTT":
+                    if message[:6] != b"\x00\x04MQTT":
                         logger.error(f"MQTT client {addr}: bad CONNECT")
                         writer.close()
                         return
@@ -205,7 +201,7 @@ class SimpleMQTTServer:
         return value, bytes_read
 
     def parse_publish(self, data):
-        topic_len = struct.unpack("!H", data[0:2])[0]
+        topic_len = struct.unpack("!H", data[:2])[0]
         topic = data[2 : 2 + topic_len].decode("utf-8")
         packid = struct.unpack("!H", data[2 + topic_len : 4 + topic_len])[0]
         message_start = 4 + topic_len
@@ -213,9 +209,8 @@ class SimpleMQTTServer:
         return topic, packid, message
 
     def parse_subscribe(self, data):
-        topic_len = struct.unpack("!H", data[0:2])[0]
-        topic = data[2 : 2 + topic_len].decode("utf-8")
-        return topic
+        topic_len = struct.unpack("!H", data[:2])[0]
+        return data[2 : 2 + topic_len].decode("utf-8")
 
     def encode_publish(self, topic, message, packid=0):
         topic_len = len(topic)

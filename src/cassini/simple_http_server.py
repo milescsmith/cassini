@@ -14,7 +14,7 @@ from loguru import logger
 class SimpleHTTPServer:
     BufferSize = 1024768
 
-    def __init__(self, host="0.0.0.0", port=0):
+    def __init__(self, host="127.0.0.1", port=0):
         self.host = host
         self.port = port
         self.server = None
@@ -25,10 +25,10 @@ class SimpleHTTPServer:
         md5 = hashlib.md5()
         with open(filename, "rb") as f:
             while True:
-                data = f.read(1024)
-                if not data:
+                if data := f.read(1024):
+                    md5.update(data)
+                else:
                     break
-                md5.update(data)
         route = {"file": filename, "size": size, "md5": md5.hexdigest()}
         self.routes[path] = route
         return route
@@ -72,12 +72,13 @@ class SimpleHTTPServer:
         route = self.routes[path]
         logger.debug(f"HTTP method {method} path {path} route: {route}")
 
-        header = "HTTP/1.1 200 OK\r\n"
-        # header += f"Content-Type: application/octet-stream\r\n"
-        header += "Content-Type: text/plain; charset=utf-8\r\n"
-        header += f"Etag: {route['md5']}\r\n"
-        header += f"Content-Length: {route['size']}\r\n"
-        header += "\r\n"
+        header = (
+            f"HTTP/1.1 200 OK\r\n"
+            f"Content-Type: text/plain; charset=utf-8\r\n"
+            f"Etag: {route['md5']}\r\n"
+            f"Content-Length: {route['size']}\r\n"
+            "\r\n"
+        )
 
         logger.debug(f"Writing header:\n{header}")
         writer.write(header.encode())
