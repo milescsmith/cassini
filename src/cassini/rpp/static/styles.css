@@ -1,0 +1,319 @@
+/* styles.css - Assurez-vous que ce fichier est bien lié dans votre index.html */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column; /* Changez la direction pour une disposition en colonne */
+}
+
+.header h1, .header h2 {
+    margin: 0; /* Ajustez les marges selon vos besoins */
+}
+
+.logo {
+    max-height: 200px; /* Ajustez selon la taille souhaitée pour le logo */
+    margin-right: 50px;
+    box-shadow: 0px 8px 15px rgba(0,0,0,0.6); /* Ombre port  e pour cr  er un effet de profondeur */
+    border-radius: 15px; /* Arrondit les coins du conteneur du logo */
+    overflow: hidden; /* S'assure que le logo ne d  passe pas les coins arrondis */
+}
+
+.online-status {
+    padding: 5px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    margin-right: 10px; /* Assure un espacement entre les boutons */
+    box-shadow: 0px 8px 15px rgba(0,0,0,0.6); /* Ombre port  e pour cr  er un effet de profondeur */
+    overflow: hidden; /* S'assure que le logo ne d  passe pas les coins arrondis */
+}
+
+.online-status.online {
+    background-color: green;
+}
+
+.online-status.offline {
+    background-color: red;
+}
+
+.printer-ip-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.printer-ip-container input {
+    padding: 5px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 24%; /* R  duit la largeur    50% de la largeur du conteneur parent */
+    box-shadow: 0px 8px 15px rgba(0,0,0,0.6); /* Ombre port  e pour cr  er un effet de profondeur */
+    overflow: hidden; /* S'assure que le logo ne d  passe pas les coins arrondis */
+}
+
+.edit-ip-btn, .save-ip-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+    margin-left: 5px; /* Assure un espacement entre les boutons */
+    margin-right: 20px; /* Assure un espacement entre les boutons */
+    box-shadow: 0px 8px 15px rgba(0,0,0,0.6); /* Ombre port  e pour cr  er un effet de profondeur */
+    overflow: hidden; /* S'assure que le logo ne d  passe pas les coins arrondis */
+}
+
+
+.edit-ip-btn {
+    background-color: #007bff; /* Bleu */
+}
+
+.edit-ip-btn:hover {
+    background-color: #006fe6; /* Bleu foncé au survol */
+}
+
+.save-ip-btn {
+    background-color: #28a745; /* Vert */
+    display: none; /* Caché par défaut */
+}
+
+.save-ip-btn:hover {
+    background-color: #218838; /* Vert foncé au survol */
+}
+
+
+.container {
+    width: 80%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    box-shadow: 0px 8px 15px rgba(0,0,0,0.6); /* Ombre port  e pour cr  er un effet de profondeur */
+    border-radius: 15px; /* Arrondit les coins du conteneur du logo */
+    overflow: hidden; /* S'assure que le logo ne d  passe pas les coins arrondis */
+}
+
+.status-text {
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-family: 'Roboto', 'Arial', sans-serif; /* Police sans empattement moderne */
+    color: #333; /* Couleur de texte fonc  e pour le contraste */
+#    letter-spacing: 0.5px; /* Espacement des lettres pour un look   pur   */
+#    line-height: 1.6; /* Espacement des lignes pour la lisibilit   */
+    font-weight: bold;
+}
+
+.progress-container {
+    background-color: #ddd;
+    border-radius: 20px; /* Increased radius for a more modern, rounded look */
+    overflow: hidden; /* Ensures child elements adhere to the border radius */
+    position: relative;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adds subtle shadow for depth */
+    box-shadow: 0px 8px 15px rgba(0,0,0,0.6); /* Ombre port  e pour cr  er un effet de profondeur */
+    overflow: hidden; /* S'assure que le logo ne d  passe pas les coins arrondis */
+}
+
+.progress-bar {
+    height: 30px;
+    background-color: #4CAF50; /* Fallback color */
+    background-image: linear-gradient(to right, #76b852, #8DC26F); /* Gradient effect */
+    border-radius: 20px; /* Maintain the same border radius as the container for consistency */
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    line-height: 30px;
+    color: #333;
+    top: 0;
+    transition: opacity 0.5s ease; /* Smooth transition for text opacity */
+    font-family: 'Roboto', 'Arial', sans-serif; /* Police sans empattement moderne */
+    color: #333; /* Couleur de texte fonc  e pour le contraste */
+#    letter-spacing: 0.5px; /* Espacement des lettres pour un look   pur   */
+#    line-height: 1.6; /* Espacement des lignes pour la lisibilit   */
+    font-weight: bold;
+}
+
+.file-management-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 80%;
+    margin: 20px auto;
+    align-items: flex-start; /* Aligner les enfants en haut */
+}
+
+.file-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+    margin-right: 10px;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    overflow-y: auto;
+    height: 200px; /* Adjust as needed */
+}
+
+.file-list th, .file-list td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-family: 'Roboto', 'Arial', sans-serif; /* Police sans empattement moderne */
+    color: #333; /* Couleur de texte fonc  e pour le contraste */
+#    letter-spacing: 0.5px; /* Espacement des lettres pour un look   pur   */
+#    line-height: 1.6; /* Espacement des lignes pour la lisibilit   */
+    font-weight: bold;
+}
+
+.file-list tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.file-list tr:hover {
+    background-color: #ddd;
+}
+
+.file-list th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    background-color: #333; /* La même couleur que celle du titre de la page */
+    color: white;
+}
+
+.file-list-item {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between; /* Pour aligner le nom et la taille sur les côtés opposés */
+}
+
+.file-list-item.selected {
+    background-color: #e0e0e0;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Aligner les boutons en haut avec le cadre */
+}
+
+.action-button {
+    padding: 10px 20px;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    color: white;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    width: 100%; /* Faire en sorte que les boutons remplissent le conteneur */
+    text-align: center; /* Centrer le texte dans les boutons */
+    margin-top: 20px; /* Assure un espacement entre les boutons */
+    margin-right: 20px; /* Assure un espacement entre les boutons */
+    margin-left: 20px; /* Assure un espacement entre les boutons */
+}
+
+.print-button {
+    background-color: #4CAF50;
+}
+
+.delete-button {
+    background-color: #f44336;
+}
+
+.upload-button {
+    background-color: #007bff; /* Couleur bleue pour le bouton upload */
+    /* ... autres styles ... */
+}
+
+/* styles.css - Ajoutez ces styles pour le spinner et l'indicateur de pourcentage */
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #000;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    text-align: center;
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#loading-indicator p {
+    margin-top: 10px;
+}
+
+/* Style pour la ligne sélectionnée */
+.file-list tr.selected {
+    background-color: #add8e6; /* Couleur bleutée pour la ligne sélectionnée */
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 0.8em; /* Taille de texte plus petite */
+    border-top: 1px solid #444; /* Ajoute une bordure en haut du footer */
+    position:absolute;
+    bottom:0;  /* on le colle en bas */
+    width:100%;
+    height:100px;   /* Hauteur du pied de page */
+
+    font-family: 'Roboto', 'Arial', sans-serif; /* Police sans empattement moderne */
+#    letter-spacing: 0.5px; /* Espacement des lettres pour un look   pur   */
+#    line-height: 1.6; /* Espacement des lignes pour la lisibilit   */
+}
+
+footer a {
+    color: #ddd;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+footer a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
