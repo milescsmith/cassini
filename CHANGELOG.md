@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0-alpha]
+
+### Added
+
+- Incorporating code from the [Resin Print Portal (RPP)](https://github.com/jjtronics/RPP). Non-functional at the moment.
+
 ## [1.5.0] - 2024-07-30
 
 ### Fixed
@@ -56,6 +62,7 @@
 - linting via ruff
 - Some typing (with a lot left to go)
 
+[2.0.0-alpha] : https://github.com/milescsmith/cassini/compare/1.5.0..2.0.0-alpha
 [1.5.0]: https://github.com/milescsmith/cassini/compare/1.4.0..1.5.0
 [1.4.0]: https://github.com/milescsmith/cassini/compare/1.3.0..1.4.0
 [1.3.0]: https://github.com/milescsmith/cassini/compare/1.2.0..1.3.0
