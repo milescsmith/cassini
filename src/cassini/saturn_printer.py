@@ -7,7 +7,9 @@
 
 import asyncio
 import json
-import random
+import secrets
+
+# import random
 import socket
 import sys
 import time
@@ -58,7 +60,7 @@ class Command(IntEnum):
 
 
 def random_hexstr():
-    return f"{random.getrandbits(128):032x}"
+    return f"{secrets.randbits(128):032x}"
 
 
 # TODO: feels like we should change the desc member to either a namedtuple or dataclass
@@ -166,7 +168,7 @@ class SaturnPrinter(Printer):
             self.file_transfer_future.set_result((-1, -1, filename))
             self.file_transfer_future = asyncio.get_running_loop().create_future()
 
-    async def upload_file_inner(self, filename: Path, start_printing: bool = False):
+    async def upload_file_inner(self, filename: Path): #, start_printing: bool = False):
         # schedule a future that can be used for status, in case this is kicked off as a task
         self.file_transfer_future = asyncio.get_running_loop().create_future()
 
@@ -344,7 +346,7 @@ class SaturnPrinter(Printer):
 
         logger.getLogger("scapy.runtime").setLevel(logger.WARNING)
         ip = IP(dst=self.addr[0], src=mqtt_host)
-        any_src_port = random.randint(1024, 65535)
+        any_src_port = secrets.choice(range(1024,65535))
         udp = UDP(sport=any_src_port, dport=SATURN_UDP_PORT)
         payload = f"M66666 {mqtt_port}"
         packet = ip / udp / payload

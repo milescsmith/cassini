@@ -22,7 +22,8 @@ class SimpleHTTPServer:
 
     def register_file_route(self, path, filename):
         size = os.path.getsize(filename)
-        md5 = hashlib.md5()
+        # TODO: can we replace use of hashlib?
+        md5 = hashlib.md5()  # noqa: S324
         with open(filename, "rb") as f:
             while True:
                 if data := f.read(1024):

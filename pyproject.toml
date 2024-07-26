@@ -1,6 +1,6 @@
 [project]
 name = "cassini"
-version = "1.3.0"
+version = "1.4.0"
 description = "Interact with ELEGOO printers"
 authors = [
     {name = "Vladimir Vukicevic", email = "?@?.com"},
@@ -34,6 +34,7 @@ distribution = true
 [tool.pdm.dev-dependencies]
 dev = [
     "ruff>=0.5.1",
+    "pre-commit>=3.7.1",
 ]
 
 [tool.pdm.scripts]

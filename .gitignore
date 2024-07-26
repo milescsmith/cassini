@@ -160,5 +160,8 @@ cython_debug/
 #.idea/
 
 debug.py
-debug.py
 playground.ipynb
+.pdm-build/
+.github/
+.vscode/
+.ruff_cache/

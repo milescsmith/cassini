@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0] - 2024-07-26
+
+### Added
+
+- Pre-commit and other elements to bring this in line with general modernizing efforts
+
 ## [1.3.0] - 2024-07-13
 
 ### Added
