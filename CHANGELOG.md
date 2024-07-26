@@ -47,5 +47,8 @@
 - linting via ruff
 - Some typing (with a lot left to go)
 
-
-[1.0.0]: https://github.com/milescsmith/pyplier/tag/1.0.0
+[1.4.0]: https://github.com/milescsmith/cassini/compare/1.3.0..1.4.0
+[1.3.0]: https://github.com/milescsmith/cassini/compare/1.2.0..1.3.0
+[1.2.0]: https://github.com/milescsmith/cassini/compare/1.1.0..1.2.0
+[1.1.0]: https://github.com/milescsmith/cassini/compare/1.0.0..1.1.0
+[1.0.0]: https://github.com/milescsmith/cassini/tag/1.0.0
