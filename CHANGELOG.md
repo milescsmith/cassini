@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.5.0] - 2024-07-30
+
+### Fixed
+
+- Undid a bug introduced in 1.3.0 where the MQTT server was set to listen only on localhost instead of 0.0.0.0, which
+    meant that any transfers would just timeout
+- Removed the "start_printing" argument from any and all of the upload functions since it was unused and only caused 
+    problems
+
 ## [1.4.0] - 2024-07-26
 
 ### Added
@@ -47,6 +56,7 @@
 - linting via ruff
 - Some typing (with a lot left to go)
 
+[1.5.0]: https://github.com/milescsmith/cassini/compare/1.4.0..1.5.0
 [1.4.0]: https://github.com/milescsmith/cassini/compare/1.3.0..1.4.0
 [1.3.0]: https://github.com/milescsmith/cassini/compare/1.2.0..1.3.0
 [1.2.0]: https://github.com/milescsmith/cassini/compare/1.1.0..1.2.0

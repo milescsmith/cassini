@@ -23,7 +23,7 @@ class Printer(ABC):
         pass
 
     @abstractmethod
-    async def upload_file(self, filename, start_printing=False):
+    async def upload_file(self, filename):
         pass
 
     @abstractmethod

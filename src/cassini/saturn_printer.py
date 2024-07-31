@@ -160,15 +160,15 @@ class SaturnPrinter(Printer):
     async def disconnect(self):
         await self.send_command_and_wait(Command.DISCONNECT)
 
-    async def upload_file(self, filename: Path, start_printing: bool = False):
+    async def upload_file(self, filename: Path):
         try:
-            await self.upload_file_inner(filename, start_printing)
+            await self.upload_file_inner(filename)
         except Exception as ex:
             logger.error(f"Exception during upload: {ex}")
             self.file_transfer_future.set_result((-1, -1, filename))
             self.file_transfer_future = asyncio.get_running_loop().create_future()
 
-    async def upload_file_inner(self, filename: Path):  # , start_printing: bool = False):
+    async def upload_file_inner(self, filename: Path):
         # schedule a future that can be used for status, in case this is kicked off as a task
         self.file_transfer_future = asyncio.get_running_loop().create_future()
 

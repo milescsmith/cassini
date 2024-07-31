@@ -37,7 +37,7 @@ from cassini.simple_http_server import SimpleHTTPServer
 from cassini.simple_mqtt_server import SimpleMQTTServer
 
 try:
-    __version__ = version(__name__)
+    __version__ = version("cassini")
 except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
@@ -61,10 +61,11 @@ app = typer.Typer(
 verbosity_level = 0
 
 
+@app.callback()
 def version_callback(value: bool) -> None:  # FBT001
     """Prints the version of the package."""
     if value:
-        rprint(f"[yellow]boardgamegeek[/] version: [bold blue]{__version__}[/]")
+        rprint(f"[yellow]cassini[/] version: [bold blue]{__version__}[/]")
         raise typer.Exit()
 
 
@@ -84,14 +85,14 @@ def verbosity(
 
 
 async def create_mqtt_server():
-    mqtt = SimpleMQTTServer("127.0.0.1", 0)
+    mqtt = SimpleMQTTServer("0.0.0.0", 0)
     await mqtt.start()
     mqtt_server_task = asyncio.create_task(mqtt.serve_forever())
     return mqtt, mqtt.port, mqtt_server_task
 
 
 async def create_http_server():
-    http = SimpleHTTPServer("127.0.0.1", 0)
+    http = SimpleHTTPServer("0.0.0.0", 0)
     await http.start()
     http_server_task = asyncio.create_task(http.serve_forever())
     return http, http.port, http_server_task
@@ -209,7 +210,7 @@ async def do_print(printer, filename):
         raise PrintError(msg)
 
 
-async def do_upload(printer: SaturnPrinter, filename: Path, start_printing=False):
+async def do_upload(printer: SaturnPrinter, filename: Path):
     if not Path(filename).exists():
         msg = f"{filename} does not exist"
         logger.error(msg)
@@ -222,8 +223,7 @@ async def do_upload(printer: SaturnPrinter, filename: Path, start_printing=False
         logger.error(msg)
         raise ConnectionError(msg)
 
-    # await printer.upload_file(filename, start_printing=start_printing)
-    upload_task = asyncio.create_task(printer.upload_file(filename, start_printing=start_printing))
+    upload_task = asyncio.create_task(printer.upload_file(filename))
     # grab the first one, because we want the file size
     basename = filename.name
     file_size = filename.stat().st_size
@@ -270,6 +270,9 @@ def status(
     live_update: Annotated[bool, typer.Option("--live", help="Update the status table in read time.")] = False,
     update_interval: Annotated[int, typer.Option("--interval", help="Live update interval, in seconds.")] = 1,
     debug: Annotated[bool, typer.Option("--debug")] = False,
+    version: Annotated[
+        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
+    ] = False,
 ):
     if debug:
         init_logger(3)
@@ -277,8 +280,8 @@ def status(
         printers = get_printers(printer=printer)
     else:
         printers = get_printers(broadcast=broadcast)
+    console = Console()
     if live_update:
-        console = Console()
         with Live(live_status(printers), console=console, refresh_per_second=4, transient=False, screen=False) as live:
             while True:
                 time.sleep(update_interval)
@@ -294,6 +297,9 @@ def watch(
     printer_addr: Annotated[Optional[str], typer.Option("--printer", help="ID of printer to target")] = None,
     interval: Annotated[int, typer.Option("--interval", help="Status update interval (seconds)")] = 5,
     debug: Annotated[bool, typer.Option("--debug")] = False,
+    version: Annotated[
+        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
+    ] = False,
 ):
     if debug:
         init_logger(3)
@@ -304,10 +310,10 @@ def watch(
 def upload(
     filename: Annotated[Path, typer.Argument(help="File to upload")],
     printer_addr: Annotated[str, typer.Argument(help="ID of printer to target")],
-    start_printing: Annotated[
-        bool, typer.Option("--start-printing", help="Start printing after upload is complete")
-    ] = True,
     debug: Annotated[bool, typer.Option("--debug")] = False,
+    version: Annotated[
+        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
+    ] = False,
 ):
     if debug:
         init_logger(3)
@@ -318,7 +324,7 @@ def upload(
         logger.error(msg)
         raise PrintError(msg)
     else:
-        asyncio.run(do_upload(printer, filename, start_printing=start_printing))
+        asyncio.run(do_upload(printer, filename))
 
 
 @app.command(help="Start printing a file already present on the printer")
@@ -326,6 +332,9 @@ def print_file(
     filename: Annotated[str, typer.Argument(help="File to print")],
     printer_addr: Annotated[str, typer.Argument(help="ID of printer to target")],
     debug: Annotated[bool, typer.Option("--debug")] = False,
+    version: Annotated[
+        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
+    ] = False,
 ):
     if debug:
         init_logger(3)
@@ -345,6 +354,9 @@ def connect_mqtt(
     printer: Annotated[Optional[str], typer.Option("--printer", help="ID of printer to target")] = None,
     broadcast: Annotated[Optional[str], typer.Option("--broadcast", help="Explicit broadcast IP address")] = None,
     debug: Annotated[bool, typer.Option("--debug")] = False,
+    version: Annotated[
+        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
+    ] = False,
 ):
     if debug:
         init_logger(3)

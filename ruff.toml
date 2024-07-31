@@ -78,6 +78,9 @@ exclude = [
     "__pypackages__",
 ]
 
+[lint.per-file-ignores]
+"src/cassini/cassini.py" = ["S104"]
+
 [format]
 # Like Black, use double quotes for strings.
 quote-style = "double"
