@@ -4,9 +4,9 @@ from sys import stderr
 from loguru import logger
 
 
-def init_logger(verbose: int, save_log: bool = True, msg_format: str | None = None) -> None:
-    # logger.enable("cassini")
-    timezone = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+def init_logger(verbose: int, save_log: bool = False, msg_format: str | None = None) -> None:
+    logger.enable(__package__)
+    timezone = datetime.datetime.now(datetime.UTC).astimezone().tzinfo
 
     try:
         from IPython import get_ipython
@@ -17,9 +17,11 @@ def init_logger(verbose: int, save_log: bool = True, msg_format: str | None = No
 
     if msg_format is None:
         if in_notebook:
-            msg_format = "<green>{name}</green>:<red>{function}</red>:<blue>{line}</blue>·-·<level>{message}</level>"
+            msg_format = (
+                "{level}|<green>{name}</green>:<red>{function}</red>:<blue>{line}</blue> - <level>{message}</level>"
+            )
         else:
-            msg_format = "{time:YYYY-MM-DD at HH:mm:ss} | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>·-·<level>{message}</level>"
+            msg_format = "{time:YYYY-MM-DD HH:mm:ss}|{level}|<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 
     match verbose:
         case 3:
@@ -33,20 +35,18 @@ def init_logger(verbose: int, save_log: bool = True, msg_format: str | None = No
 
     config = {
         "handlers": [
-            {"sink": stderr, "format": msg_format, "level": log_level, "filter": "cassini"},
+            {"sink": stderr, "format": msg_format, "level": log_level, "filter": __package__},
         ]
     }
+    logger.configure(**config)
 
     if save_log:
-        config["handlers"].append(
-            {
-                "sink": f"cassini_{datetime.datetime.now(tz=timezone).strftime('%Y-%d-%m--%H-%M-%S')}.log",
-                "level": "DEBUG",
-                "format": "{time:YYYY-MM-DD at HH:mm:ss} | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>·-·<level>{message}</level>",
-                "filter": "cassini",
-                "backtrace": True,
-                "diagnose": True,
-            }
+        logger.add(
+            sink=f"{__package__}_{datetime.datetime.now(tz=timezone).strftime('%Y-%d-%m--%H-%M-%S')}.log",
+            level=log_level,
+            format="{time:YYYY-MM-DD HH:mm:ss}|{level}|{name}:{function}:{line} - {message}",
+            filter="dsd",
+            backtrace=True,
+            diagnose=True,
+            colorize=False,
         )
-
-    logger.configure(**config)

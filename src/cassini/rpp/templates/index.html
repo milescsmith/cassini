@@ -1,0 +1,61 @@
+<!-- index.html - Code complet -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RPP Resin Print Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='LOGO-RESIN-PRINT-PORTAL.png') }}" alt="Resin Print Portal Logo" class="logo">
+
+<div class="printer-ip-container">
+    <div id="online-indicator">
+        <span id="online-status" class="online-status offline">OFFLINE</span>
+    </div>
+    <input type="text" id="printer-ip" readonly>
+    <button onclick="editIP()" class="edit-ip-btn">Edit</button>
+    <button onclick="saveIP()" class="save-ip-btn">Save</button>
+    </div>
+</div>
+
+    <div class="container">
+        <div id="status" class="status-text">Chargement...</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+            <span class="progress-text" id="progress-text">0%</span>
+        </div>
+    </div>
+
+<div class="file-management-container">
+    <table class="file-list" id="file-list">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Size (Mo)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les lignes du tableau seront insérées ici par JavaScript -->
+        </tbody>
+    </table>
+    <!-- Le reste de vos boutons et éléments -->
+    <div class="action-buttons">
+        <button class="action-button upload-button" onclick="uploadFile()">Upload</button>
+        <button class="action-button print-button" onclick="printSelectedFile()">Print</button>
+        <button class="action-button delete-button" onclick="deleteSelectedFile()">Delete</button>
+    </div>
+</div>
+
+
+    <!-- Ensure the JS file link is correct -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <footer>
+        <p>2024 JJtronics</p>
+        <p>Projet sur GitHub : <a href="https://github.com/jjtronics/RPP" target="_blank">https://github.com/jjtronics/RPP</a></p>
+        <p>Visitez mon site web : <a href="https://www.jjtronics.com" target="_blank">https://www.jjtronics.com</a></p>
+    </footer>
+</body>
+</html>

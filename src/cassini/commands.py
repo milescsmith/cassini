@@ -6,24 +6,16 @@
 # License: MIT
 #
 import asyncio
-import contextlib
-import socket
 import time
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Annotated, Optional
 
-import typer
 from loguru import logger
-from rich import print as rprint
 from rich.console import Console
-from rich.live import Live
 from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
     Progress,
-    # RenderableColumn,
-    # SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
@@ -31,10 +23,11 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from cassini.logging import init_logger
+from cassini.exceptions import PrintError, PrintersError, UploadError
 from cassini.saturn_printer import CurrentStatus, FileStatus, PrintInfoStatus, SaturnPrinter
 from cassini.simple_http_server import SimpleHTTPServer
 from cassini.simple_mqtt_server import SimpleMQTTServer
+from cassini.utils import get_printers
 
 try:
     __version__ = version("cassini")
@@ -42,57 +35,15 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
 
-class PrintError(Exception):
-    pass
-
-
-class UploadError(Exception):
-    pass
-
-
-app = typer.Typer(
-    name="cassini",
-    short_help="ELEGOO Saturn printer control utility",
-    add_completion=False,
-    no_args_is_help=True,
-    rich_markup_mode="rich",
-)
-
-verbosity_level = 0
-
-
-@app.callback()
-def version_callback(value: bool) -> None:  # FBT001
-    """Prints the version of the package."""
-    if value:
-        rprint(f"[yellow]cassini[/] version: [bold blue]{__version__}[/]")
-        raise typer.Exit()
-
-
-@app.callback()
-def verbosity(
-    verbose: Annotated[
-        int,
-        typer.Option(
-            "-v",
-            "--verbose",
-            help="Control output verbosity. Pass this argument multiple times to increase the amount of output.",
-            count=True,
-        ),
-    ] = 0,
-) -> None:
-    verbosity_level = verbose  # noqa: F841
-
-
 async def create_mqtt_server():
-    mqtt = SimpleMQTTServer("0.0.0.0", 0)
+    mqtt = SimpleMQTTServer("127.0.0.1", 0)
     await mqtt.start()
     mqtt_server_task = asyncio.create_task(mqtt.serve_forever())
     return mqtt, mqtt.port, mqtt_server_task
 
 
 async def create_http_server():
-    http = SimpleHTTPServer("0.0.0.0", 0)
+    http = SimpleHTTPServer("127.0.0.1", 0)
     await http.start()
     http_server_task = asyncio.create_task(http.serve_forever())
     return http, http.port, http_server_task
@@ -244,130 +195,19 @@ async def do_upload(printer: SaturnPrinter, filename: Path):
     await upload_task
 
 
-def get_printers(
-    printer: Optional[str] = None,
-    broadcast: str = "<broadcast>",
-):
-    if printer:
-        printer = SaturnPrinter().find_printer(addr=printer)
-        if printer is None:
-            logger.error(f"No response from printer {printer}")
-        printers = [printer]
-    else:
-        printers = SaturnPrinter().find_printers(broadcast=broadcast)
-        if len(printers) == 0:
-            logger.error("No printers found on network")
-    return printers
-
-
-@app.command(help="Discover and display status of all printers")
-def status(
-    printer: Annotated[Optional[str], typer.Argument(help="ID of printer to target")] = None,
-    broadcast: Annotated[str, typer.Option("--broadcast", help="Explicit broadcast IP address")] = "<broadcast>",
-    status_full: Annotated[
-        bool, typer.Option("--full", help="Discover and display full status of all printers")
-    ] = False,
-    live_update: Annotated[bool, typer.Option("--live", help="Update the status table in read time.")] = False,
-    update_interval: Annotated[int, typer.Option("--interval", help="Live update interval, in seconds.")] = 1,
-    debug: Annotated[bool, typer.Option("--debug")] = False,
-    version: Annotated[
-        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
-    ] = False,
-):
-    if debug:
-        init_logger(3)
-    if printer:
-        printers = get_printers(printer=printer)
-    else:
-        printers = get_printers(broadcast=broadcast)
-    console = Console()
-    if live_update:
-        with Live(live_status(printers), console=console, refresh_per_second=4, transient=False, screen=False) as live:
-            while True:
-                time.sleep(update_interval)
-                live.update(do_status(printers))
-    elif status_full:
-        console.print(do_status_full(printers))
-    else:
-        console.print(do_status(printers))
-
-
-@app.command(help="Continuously update the status of the selected printer")
-def watch(
-    printer_addr: Annotated[Optional[str], typer.Option("--printer", help="ID of printer to target")] = None,
-    interval: Annotated[int, typer.Option("--interval", help="Status update interval (seconds)")] = 5,
-    debug: Annotated[bool, typer.Option("--debug")] = False,
-    version: Annotated[
-        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
-    ] = False,
-):
-    if debug:
-        init_logger(3)
-    do_watch(printer_addr, interval=interval)
-
-
-@app.command(help="Upload a file to the printer")
-def upload(
-    filename: Annotated[Path, typer.Argument(help="File to upload")],
-    printer_addr: Annotated[str, typer.Argument(help="ID of printer to target")],
-    debug: Annotated[bool, typer.Option("--debug")] = False,
-    version: Annotated[
-        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
-    ] = False,
-):
-    if debug:
-        init_logger(3)
-    printer = SaturnPrinter().find_printer(addr=printer_addr)
-    logger.info(f"Printer: {printer.describe()} ({printer.addr[0]})")
-    if printer.busy:
-        msg = f"Printer is busy (status: {printer.current_status})"
-        logger.error(msg)
-        raise PrintError(msg)
-    else:
-        asyncio.run(do_upload(printer, filename))
-
-
-@app.command(help="Start printing a file already present on the printer")
-def print_file(
-    filename: Annotated[str, typer.Argument(help="File to print")],
-    printer_addr: Annotated[str, typer.Argument(help="ID of printer to target")],
-    debug: Annotated[bool, typer.Option("--debug")] = False,
-    version: Annotated[
-        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
-    ] = False,
-):
-    if debug:
-        init_logger(3)
-    printer = SaturnPrinter().find_printer(addr=printer_addr)
-    logger.info(f"Printer: {printer.describe()} ({printer.addr[0]})")
-    if printer.busy:
-        msg = f"Printer is busy (status: {printer.current_status})"
-        logger.error(msg)
-        raise PrintError(msg)
-    else:
-        asyncio.run(do_print(printer, filename))
-
-
-@app.command(help="Connect printer to particular MQTT server")
-def connect_mqtt(
-    address: Annotated[str, typer.Argument(help='MQTT host and port, e.g. "192.168.1.33:1883" or "mqtt.local:1883"')],
-    printer: Annotated[Optional[str], typer.Option("--printer", help="ID of printer to target")] = None,
-    broadcast: Annotated[Optional[str], typer.Option("--broadcast", help="Explicit broadcast IP address")] = None,
-    debug: Annotated[bool, typer.Option("--debug")] = False,
-    version: Annotated[
-        bool, typer.Option("--version", help="Show version", callback=version_callback, is_eager=True)
-    ] = False,
-):
-    if debug:
-        init_logger(3)
-    printers = get_printers(printer, broadcast)
-
-    mqtt_host, mqtt_port = address.split(":")
-    with contextlib.suppress(socket.gaierror):
-        mqtt_host = socket.gethostbyname(mqtt_host)
-    for p in printers:
-        p.connect_mqtt(mqtt_host, mqtt_port)
-
-
-if __name__ == "main":
-    app()
+def find_printer_addr(broadcast="<broadcast>") -> str:
+    printers = get_printers(broadcast=broadcast)
+    match len(printers):
+        case 1:
+            printer_addr = printers[0].addr[0]
+            logger.info(f"Printer found at {printer_addr}")
+        case 0:
+            msg = "Unable to automatically printers on the network. Try specifying the printer's IP address"
+            raise PrintersError(msg)
+        case _:
+            msg = (
+                f"{len(printers)} were found, and `watch` is currently only capable of monitoring one "
+                f"printer at a time. Please specify the desired printer's IP address"
+            )
+            raise PrintersError(msg)
+    return printer_addr

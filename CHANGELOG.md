@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.0.0]
+
+### Added
+
+- Incorporated code from the [Resin Print Portal (RPP)](https://github.com/jjtronics/RPP) project.
+    - Added running RPP via Waitress as a server
+
+### Changed
+
+- Increased Typer required version to allow for newer Union types
+- Unified passing the printer's IP address as an argument or option (i.e. do
+you have to put `--printer` before the address?)
+    - Passing the IP address is now optional as long as there is just one printer
+        on the network
+- Reorganized module structure, separating the CLI commands from the underlying 
+    functions they call
+- 
+
 ## [1.5.0] - 2024-07-30
 
 ### Fixed
@@ -56,6 +74,7 @@
 - linting via ruff
 - Some typing (with a lot left to go)
 
+[2.0.0]: https://github.com/milescsmith/cassini/compare/1.5.0..2.0.0
 [1.5.0]: https://github.com/milescsmith/cassini/compare/1.4.0..1.5.0
 [1.4.0]: https://github.com/milescsmith/cassini/compare/1.3.0..1.4.0
 [1.3.0]: https://github.com/milescsmith/cassini/compare/1.2.0..1.3.0
