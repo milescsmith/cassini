@@ -1,21 +1,21 @@
-import re
-import subprocess
-import threading
 import time
 from pathlib import Path
+from typing import Literal
 
-from flask import Flask, Response, jsonify, render_template, request, send_from_directory
+from flask import Flask, Response, jsonify, render_template, request
 from loguru import logger
 from werkzeug.utils import secure_filename
 
-from cassini import status
-from cassini.saturn_printer import SaturnPrinter
+from cassini.cli import do_print, do_upload
+from cassini.exceptions import PrintersError
+from cassini.saturn_printer import PrintInfoStatus, SaturnPrinter
 
 app = Flask(__name__)
 
-printer_ip = "192.168.1.50"
+printer_ip = Literal["192.168.0.235"]
 UPLOAD_FOLDER = Path("uploads")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+UNABLE_TO_READ_ADDRESS = Literal["The printer's IP address could not be read."]
 
 if not UPLOAD_FOLDER.exists():
     UPLOAD_FOLDER.mkdir()
@@ -30,17 +30,26 @@ def index() -> str:
 @app.route("/get-printer-ip", methods=["GET"])
 def get_printer_ip() -> Response:
     try:
-        sp = SaturnPrinter().find_printers()[0]
-        ip = sp.addr[0]
-        logger.info(f"Address IP: {ip}")  # Pour le débogage
-        return jsonify({"ip": ip})  # Renvoie une réponse JSON
+        printers = SaturnPrinter().find_printers()
+        match len(printers):
+            case 0:
+                msg = "No printers were found"
+                raise PrintersError(msg)
+            case 1:
+                sp = printers[0]
+                ip = sp.addr[0]
+                logger.info(f"Address IP: {ip}")  # Pour le débogage
+                return jsonify({"ip": ip})  # Renvoie une réponse JSON
+            case _:
+                msg = "Multiple printers found"
+                raise PrintersError(msg)
     except Exception as e:
         msg = "No printer was found on the network"
-        logger.errorprint(f"{msg}: {e}")  # Pour le débogage
+        logger.error(f"{msg}: {e}")  # Pour le débogage
         return jsonify({"error": str(e)})  # Renvoie une erreur en JSON
 
 
-def read_printer_ip() -> str:
+def read_printer_ip() -> str | None:
     try:
         sp = SaturnPrinter().find_printers()[0]
         return sp.addr[0]
@@ -59,10 +68,10 @@ def set_printer_ip():
         logger.info(f"Attempting to update the printer's IP address: {new_ip}")
         with open("printer_ip.txt", "w") as file:
             file.write(new_ip)
-        print("L'adresse IP de l'imprimante a été mise à jour.")
+        print("The printer's IP address has been updated.")
         return jsonify({"message": "IP updated"})
     except Exception as e:
-        print(f"Erreur lors de la mise à jour de l'adresse IP : {e}")
+        print(f"Error updating IP address : {e}")
         return jsonify({"error": str(e)})
 
 
@@ -70,22 +79,16 @@ def set_printer_ip():
 def print_status():
     printer_ip = read_printer_ip()
     if printer_ip is None:
-        return jsonify({"error": "L'adresse IP de l'imprimante n'a pas pu être lue."})
-
+        return jsonify({"error": UNABLE_TO_READ_ADDRESS})
     try:
-        # cmd = ["./cassini.py", "-p", printer_ip, "status"]
-        # result = subprocess.run(cmd, capture_output=True, text=True)
-        # output = result.stdout.strip()
-        sp = SaturnPrinter(printer_ip)
-        output = status(printer_addr=printer_ip)
+        sp = SaturnPrinter().find_printer(printer_ip)
+        output = PrintInfoStatus(sp.desc["Data"]["Status"]["PrintInfo"]["Status"]).name
 
-        is_online = printer_ip in output
+        is_online = bool(sp.desc["Data"]["Status"]["CurrentStatus"])
 
-        if match := re.search(r"Layers: (\d+)/(\d+)", output):
-            current_layer, total_layers = match.groups()
-            progress = (int(current_layer) / int(total_layers)) * 100
-        else:
-            current_layer, total_layers, progress = "N/A", "N/A", 0
+        current_layer = sp.desc["Data"]["Status"]["PrintInfo"]["CurrentLayer"]
+        total_layers = sp.desc["Data"]["Status"]["PrintInfo"]["TotalLayer"]
+        progress = (int(current_layer) / int(total_layers)) * 100
 
         return jsonify(
             {
@@ -121,32 +124,18 @@ def list_files():
     return jsonify(files_info)
 
 
-def run_command(cmd, on_complete=None, *args):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    for line in iter(process.stdout.readline, ""):
-        print(line, end="")
-        if "100%" in line:
-            break
-
-    process.terminate()
-
-    if on_complete:
-        on_complete(*args)
-
-
 progress_status = {}
 
 
 def print_file_after_upload(filename):
     printer_ip = read_printer_ip()
     if printer_ip is None:
-        return jsonify({"error": "L'adresse IP de l'imprimante n'a pas pu être lue."})
+        return jsonify({"error": UNABLE_TO_READ_ADDRESS})
     # Envoie la mise à jour de progression à 75%
     progress_status[filename] = 75  # Mettre à jour l'état d'avancement
     time.sleep(10)
-    print_cmd = ["./cassini.py", "--printer", printer_ip, "print", filename]
-    subprocess.run(print_cmd, capture_output=True, text=True, check=False)
+    do_print(printer=printer_ip, filename=filename)
+
     # Envoie la mise à jour de progression à 100%
     progress_status[filename] = 100  # Mettre à jour l'état d'avancement après impression
 
@@ -160,14 +149,12 @@ def get_progress(filename):
 def print_file():
     printer_ip = read_printer_ip()
     if printer_ip is None:
-        return jsonify({"error": "L'adresse IP de l'imprimante n'a pas pu être lue."})
+        return jsonify({"error": UNABLE_TO_READ_ADDRESS})
 
     filename = request.json["filename"]
     filepath = app.config["UPLOAD_FOLDER"].joinpath(filename)
 
-    upload_cmd = ["./cassini.py", "--printer", printer_ip, "upload", filepath]
-    upload_thread = threading.Thread(target=run_command, args=(upload_cmd, print_file_after_upload, filename))
-    upload_thread.start()
+    do_upload(printer=printer_ip, filename=filepath)
 
     # Ici, nous supposons que la mise à jour de la progression est gérée dans un autre mécanisme
     return jsonify({"message": f"Uploading {filename}, printing will start shortly."})
@@ -185,5 +172,15 @@ def delete_file():
         return jsonify({"error": str(e)})
 
 
+def run_rpp(host: str = "127.0.0.1", port: int = 5001, debug: bool = False):
+    if debug:
+        app.run(debug=True, port=port, host=host)  # noqa: S201
+    else:
+        from waitress import serve
+
+        listen_on = f"{host}:{port}"
+        serve(app, listen=listen_on)
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5001, host="0.0.0.0")
+    app.run(debug=True, port=5001, host="127.0.0.1")  # noqa: S201

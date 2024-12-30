@@ -40,6 +40,7 @@ class PrintInfoStatus(IntEnum):
     EXPOSURE = 2
     RETRACTING = 3
     LOWERING = 4
+    FINISHED = 12  # I guess? This is the status I get at the end of a print but not sure how it differs from 16
     COMPLETE = 16  # pretty sure this is correct
 
 
