@@ -14,7 +14,7 @@ from loguru import logger
 class SimpleHTTPServer:
     BufferSize = 1024768
 
-    def __init__(self, host="127.0.0.1", port=0):
+    def __init__(self, host="0.0.0.0", port=0):  # noqa: S104
         self.host = host
         self.port = port
         self.server = None
