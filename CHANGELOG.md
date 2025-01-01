@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1]
+
+### Fixed
+
+- That damned inability of MQTT to work with anything other than `host="0.0.0.0"` bites me again
+
+
 ## [2.0.0]
 
 ### Added
@@ -74,6 +81,7 @@ you have to put `--printer` before the address?)
 - linting via ruff
 - Some typing (with a lot left to go)
 
+[2.0.1]: https://github.com/milescsmith/cassini/compare/2.0.0..2.0.1
 [2.0.0]: https://github.com/milescsmith/cassini/compare/1.5.0..2.0.0
 [1.5.0]: https://github.com/milescsmith/cassini/compare/1.4.0..1.5.0
 [1.4.0]: https://github.com/milescsmith/cassini/compare/1.3.0..1.4.0

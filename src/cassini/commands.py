@@ -36,14 +36,14 @@ except PackageNotFoundError:  # pragma: no cover
 
 
 async def create_mqtt_server():
-    mqtt = SimpleMQTTServer("127.0.0.1", 0)
+    mqtt = SimpleMQTTServer("0.0.0.0", 0)  # noqa: S104
     await mqtt.start()
     mqtt_server_task = asyncio.create_task(mqtt.serve_forever())
     return mqtt, mqtt.port, mqtt_server_task
 
 
 async def create_http_server():
-    http = SimpleHTTPServer("127.0.0.1", 0)
+    http = SimpleHTTPServer("0.0.0.0", 0)  # noqa: S104
     await http.start()
     http_server_task = asyncio.create_task(http.serve_forever())
     return http, http.port, http_server_task
