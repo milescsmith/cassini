@@ -1,7 +1,8 @@
 import time
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
+import typer
 from flask import Flask, Response, jsonify, render_template, request
 from loguru import logger
 from werkzeug.utils import secure_filename
@@ -19,6 +20,16 @@ UNABLE_TO_READ_ADDRESS = Literal["The printer's IP address could not be read."]
 
 if not UPLOAD_FOLDER.exists():
     UPLOAD_FOLDER.mkdir()
+
+
+rpp = typer.Typer(
+    name="rpp",
+    short_help="Resin Print Project ELEGOO Saturn printer control server",
+    add_completion=False,
+    no_args_is_help=True,
+    rich_markup_mode="rich",
+    rich_help_panel=True,
+)
 
 
 # TODO: figure out gettext or some other localization library
@@ -179,6 +190,24 @@ def run_rpp(host: str = "127.0.0.1", port: int = 5001, debug: bool = False):
         from waitress import serve
 
         listen_on = f"{host}:{port}"
+        serve(app, listen=listen_on)
+
+
+@rpp.command(help="Start Resin Print Project server")
+def rpp(
+    port: Annotated[int, typer.Option("-p", "--port", help="Port on which RPP should listen")] = 5001,
+    host: Annotated[str | None, typer.Option("-s", "--host", help="iterfaces where RPP should listen")] = None,
+    debug: Annotated[bool, typer.Option("-d", "--debug", help="run rpp in debug mode")] = False,
+):
+    if debug:
+        app.run(debug=True, port=port, host=host)  # noqa: S201
+    else:
+        from waitress import serve
+
+        if host is None:
+            listen_on = f"127.0.0.1:{port} localhost:{port}"
+        else:
+            listen_on = f"{host}:{port}"
         serve(app, listen=listen_on)
 
 
