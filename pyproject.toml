@@ -1,6 +1,6 @@
 [project]
 name = "cassini"
-version = "2.0.1"
+version = "2.1.0"
 description = "Interact with ELEGOO printers"
 authors = [
     {name = "Vladimir Vukicevic", email = "?@?.com"},
@@ -34,13 +34,13 @@ rpp = "cassini.rpp.rpp:run_rpp"
 [tool.pdm]
 distribution = true
 
-[tool.pdm.dev-dependencies]
-dev = [
-    "ruff>=0.5.1",
-    "pre-commit>=3.7.1",
-]
-
 [tool.pdm.scripts]
 format = "ruff format src/"
 lint = "ruff check --fix src/"
 all = {composite = ["format", "lint"]}
+
+[dependency-groups]
+dev = [
+    "ruff>=0.5.1",
+    "pre-commit>=3.7.1",
+]

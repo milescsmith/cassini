@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.0]
+
+### Changed
+
+- Move RPP out of the main CLI so that nothing complains when you haven't isntalled flask
+
 ## [2.0.1]
 
 ### Fixed

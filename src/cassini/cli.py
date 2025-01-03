@@ -21,7 +21,6 @@ from rich.live import Live
 
 from cassini.commands import do_print, do_status, do_status_full, do_upload, do_watch, live_status
 from cassini.logging import init_logger
-from cassini.rpp.rpp import app
 from cassini.saturn_printer import SaturnPrinter
 from cassini.utils import find_printer_addr, get_printers
 
@@ -201,24 +200,6 @@ def connect_mqtt(
         mqtt_host = socket.gethostbyname(mqtt_host)
     for p in printers:
         p.connect_mqtt(mqtt_host, mqtt_port)
-
-
-@cassini.command(help="Start Resin Print Project server")
-def rpp(
-    port: Annotated[int, typer.Option("-p", "--port", help="Port on which RPP should listen")] = 5001,
-    host: Annotated[str | None, typer.Option("-s", "--host", help="iterfaces where RPP should listen")] = None,
-    debug: Annotated[bool, typer.Option("-d", "--debug", help="run rpp in debug mode")] = False,
-):
-    if debug:
-        app.run(debug=True, port=port, host=host)
-    else:
-        from waitress import serve
-
-        if host is None:
-            listen_on = f"127.0.0.1:{port} localhost:{port}"
-        else:
-            listen_on = f"{host}:{port}"
-        serve(app, listen=listen_on)
 
 
 if __name__ == "main":
